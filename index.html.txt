@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Jumper Secure System</title>
+
+<style>
+body{
+    background:black;
+    color:#ccff00;
+    font-family:Courier New;
+    text-align:center;
+    padding:20px;
+}
+
+.container{
+    border:2px solid #ccff00;
+    padding:20px;
+    box-shadow:0 0 20px #ccff00;
+    max-width:700px;
+    margin:auto;
+}
+
+input,button{
+    background:black;
+    color:#ccff00;
+    border:1px solid #ccff00;
+    padding:10px;
+    margin-top:10px;
+}
+
+button:hover{
+    background:#ccff00;
+    color:black;
+}
+
+.hidden{display:none;}
+
+#timer{
+    margin-bottom:10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- Áudio corrigido -->
+<audio id="music" loop>
+<source src="https://www.soundjay.com/misc/sounds/typing-1.mp3">
+</audio>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div id="login">
+<h2>⚠️ SECURE SYSTEM</h2>
+<p>Access Required</p>
+<input id="team" placeholder="Enter team name"><br>
+<button onclick="start()">ACCESS</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="hidden">
+<div id="timer"></div>
+<h2 id="title"></h2>
+<div id="content"></div>
+</div>
+
+</div>
+
+<script>
+let level=1;
+let time=0;
+let timer;
+let ranking = JSON.parse(localStorage.getItem("ranking") || "[]");
+
+function start(){
+let teamInput = document.getElementById("team").value;
+
+if(teamInput === ""){
+alert("Enter team name");
+return;
+}
+
+document.getElementById("login").classList.add("hidden");
+document.getElementById("game").classList.remove("hidden");
+
+document.getElementById("music").play();
+
+timer=setInterval(()=>{
+time++;
+document.getElementById("timer").innerText="Time: "+time+"s";
+},1000);
+
+load();
+}
+
+function load(){
+let c="";
+let title = document.getElementById("title");
+let content = document.getElementById("content");
+
+switch(level){
+
+case 1:
+title.innerText="Level 1";
+c=`<p>Select the correct sentence:</p>
+<button onclick="next()">She is 20 years old</button><br>
+<button onclick="wrong()">She have 20 years</button>`;
+break;
+
+case 2:
+title.innerText="Level 2";
+c=`<p>I have pages but I am not a person</p>
+<input id="a"><br>
+<button onclick="check('book')">OK</button>`;
+break;
+
+case 3:
+title.innerText="Level 3";
+c=`<p>Where does a teacher work?</p>
+<input id="a"><br>
+<button onclick="check('school')">OK</button>`;
+break;
+
+case 4:
+title.innerText="Level 4";
+c=`<p>Decode:</p>
+<p>UIF LFZ JT JO UIF MJCSBSZ</p>
+<input id="a"><br>
+<button onclick="check('library')">OK</button>`;
+break;
+
+case 5:
+title.innerText="Level 5";
+c=`<p>Unscramble:</p>
+<p>TCAHER</p>
+<input id="a"><br>
+<button onclick="check('teacher')">OK</button>`;
+break;
+
+case 6:
+title.innerText="Level 6";
+c=`<p>Complete:</p>
+<p>I ___ a student</p>
+<input id="a"><br>
+<button onclick="check('am')">OK</button>`;
+break;
+
+case 7:
+title.innerText="Level 7";
+c=`<p>Who is lying?</p>
+<button onclick="next()">The teacher</button><br>
+<button onclick="wrong()">The student</button>`;
+break;
+
+case 8:
+title.innerText="FINAL";
+c=`<p>Who stole the key?</p>
+<button onclick="finish()">The teacher</button><br>
+<button onclick="wrong()">The student</button>`;
+break;
+
+}
+
+content.innerHTML=c;
+}
+
+function next(){
+level++;
+load();
+}
+
+function check(ans){
+let val=document.getElementById("a").value.toLowerCase();
+
+if(val.includes(ans)){
+next();
+}else{
+wrong();
+}
+}
+
+function wrong(){
+alert("Wrong! Try again.");
+}
+
+function finish(){
+clearInterval(timer);
+
+let teamName = document.getElementById("team").value;
+
+ranking.push({team:teamName,time:time});
+localStorage.setItem("ranking", JSON.stringify(ranking));
+
+ranking.sort((a,b)=>a.time-b.time);
+
+let list="<h3>🏆 Ranking</h3>";
+ranking.forEach(r=>{
+list+=`<p>${r.team} - ${r.time}s</p>`;
+});
+
+document.getElementById("content").innerHTML=
+"<h2>🎉 MISSION COMPLETE</h2><p>The teacher stole the key!</p>"+list;
+}
+</script>
+
+</body>
+</html>
